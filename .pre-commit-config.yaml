@@ -1,0 +1,80 @@
+# exclude *.snap files, they should never change
+exclude: ^.*\.snap$
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: mixed-line-ending
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: debug-statements
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.1.7'
+    hooks:
+      - id: ruff
+        args: [ --fix, --exit-non-zero-on-fix ]
+        additional_dependencies:
+          - flake8-bugbear
+          - flake8-comprehensions
+          - flake8-simplify
+          - flake8-print
+          - flake8-django
+          - flake8-eradicate
+          - flake8-quotes
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.3.0
+    hooks:
+      - id: pyupgrade
+        args: [ --py310-plus ]
+
+  - repo: https://github.com/psf/black
+    rev: 22.10.0
+    hooks:
+      - id: black
+        name: "Black for django"
+        language_version: python3
+        entry: black
+        args: [--config, "web/pyproject.toml"]
+        files: ^web/.*\.py$
+      - id: black
+        name: "Black for alerted"
+        language_version: python3
+        entry: black
+        args: [--config, "alerted/pyproject.toml"]
+        files: ^alerted/.*\.py$
+
+  - repo: local
+    hooks:
+      - id: check-commit-message
+        name: Check commit message
+        # Allowed formats:
+        #   CO-123: ten or more character commit message
+        #   fix: ten or more character commit message
+        #   chore(typing): ten or more character commit message
+        #   refactor!(api): braking change to API due to refactor
+        #   Merge remote tracking ...
+        entry: '\A(?!(?:(CO-\w+|(?:fix|chore|feat|refactor|style|test|docs|perf|tweak|upgrade|cleanup)!?(?:\([a-z]+\))?):\s.{10,}|\AMerge))'
+        language: pygrep
+        args: [--multiline]
+        stages: [commit-msg]
+
+  - repo: https://github.com/adamchainz/django-upgrade
+    rev: 1.7.0
+    hooks:
+      - id: django-upgrade
+        args: [ --target-version, "4.0" ]
+        files: ^web/.*\.py$
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        files: ^web/.*\.py$
